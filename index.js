@@ -3,7 +3,9 @@ const searchValue = document.querySelector("#search-value");
 const img = document.querySelector("img");
 const spanerror = document.getElementById("error-span");
 
-form.addEventListener("submit", (e) => {
+form.addEventListener("submit", getImages);
+
+async function getImages(e) {
   e.preventDefault();
   checkInputValidity();
 
@@ -11,31 +13,31 @@ form.addEventListener("submit", (e) => {
     return;
   }
 
-  fetch(
+  const response = await fetch(
     `https://api.giphy.com/v1/gifs/translate?api_key=YphoJo3ndyPiIjXnu0Hbb0Ua0DxzXHgM&s=${searchValue.value}`,
     {
       mode: "cors",
     }
   )
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Unexpected error");
-      }
-      return response.json();
-    })
-    .then((response) => {
-      console.log(response);
-      
-      if (!response.data || response.data.length == 0) {
-        throw new Error("Couldn t find results");
-      }
-      img.src = response.data.images.original.url;
-    })
-    .catch((error) => {
-      img.src = "";
-      spanerror.textContent = error;
-    });
-});
+
+  try {
+    if (!response.ok){
+      throw new Error("Unexpected error");
+    }
+    
+    const responseJson = await response.json();
+
+    if (!responseJson.data || responseJson.data.length === 0) {
+      throw new Error("Couldn t find results");
+    }
+
+    img.src = responseJson.data.images.original.url;
+
+  } catch (error) {
+    img.src = "";
+    spanerror.textContent = error;
+  }
+}
 
 searchValue.addEventListener("input", checkInputValidity);
 
